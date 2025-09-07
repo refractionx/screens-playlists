@@ -235,13 +235,16 @@
             .catch(e => {
                 document.getElementById('current').textContent = 'Failed to load playlist.';
             });
-        // Periodically check for HTML updates from GitHub and reload if changed
+        // Periodically check for playlist updates and restart play if changed
         const htmlUrl = `${baseURL}player-1.html`;
         let lastHtmlHash = null;
+        let lastPlaylistHash = null;
+
         async function hashString(str) {
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
+
         async function checkHtmlUpdate() {
             try {
                 const r = await fetch(htmlUrl, { cache: 'no-store' });
@@ -254,8 +257,29 @@
                 }
             } catch (e) { /* ignore */ }
         }
+
+        async function checkPlaylistUpdate() {
+            try {
+                const r = await fetch(playlistUrl, { cache: 'no-store' });
+                const md = await r.text();
+                const hash = await hashString(md);
+                if (lastPlaylistHash === null) {
+                    lastPlaylistHash = hash;
+                } else if (hash !== lastPlaylistHash) {
+                    lastPlaylistHash = hash;
+                    items = parsePlaylist(md);
+                    if (items.length > 0) {
+                        playItem(0); // restart play from first item
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         checkHtmlUpdate();
         setInterval(checkHtmlUpdate, 5 * 60000); // check every 5 minutes
+
+        checkPlaylistUpdate();
+        setInterval(checkPlaylistUpdate, 60000); // check playlist every 30 seconds
     </script>
 </body>
 
