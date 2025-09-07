@@ -78,6 +78,7 @@
                             // Try to parse value as number or boolean, else string
                             let val = v;
                             if (/^\d+s$/.test(v)) val = parseInt(v, 10); // duration in seconds
+                            else if (/^\d+m$/.test(v)) val = parseInt(v, 10) * 60; // duration in minutes
                             else if (v === 'true') val = true;
                             else if (v === 'false') val = false;
                             attr[k] = val;
@@ -127,7 +128,6 @@
         function playItem(idx) {
             currentIndex = idx;
             const item = items[idx];
-            console.log(items)
             item.duration = 5;;
             const playerDiv = document.getElementById('player');
             playerDiv.innerHTML = '';
@@ -183,7 +183,6 @@
                 el.style.height = '100vh';
                 el.style.objectFit = 'contain';
                 playerDiv.appendChild(el);
-                console.log(item)
                 const duration = item.duration || 5;
                 imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
             } else if (/\.(mp4|webm|ogg)$/i.test(item.url)) {
@@ -203,6 +202,18 @@
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 playerDiv.appendChild(el);
+            } else if (/^https?:\/\//.test(item.url)) {
+                // Display website in iframe
+                el = document.createElement('iframe');
+                el.src = item.url;
+                el.allow = 'autoplay; fullscreen';
+                el.style.width = '100vw';
+                el.style.height = '100vh';
+                el.style.border = 'none';
+                playerDiv.appendChild(el);
+                // Use duration or default 30s for websites
+                const duration = item.duration || 30;
+                imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
             } else {
                 playerDiv.innerHTML = '<em>Unsupported media type</em>';
             }
@@ -234,10 +245,8 @@
         async function checkHtmlUpdate() {
             try {
                 const r = await fetch(htmlUrl, { cache: 'no-store' });
-                if (r.status !== 200) return;
                 const html = await r.text();
                 const hash = await hashString(html);
-                console.log(lastHtmlHash, hash);
                 if (lastHtmlHash === null) {
                     lastHtmlHash = hash;
                 } else if (hash !== lastHtmlHash) {
