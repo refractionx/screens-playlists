@@ -226,7 +226,6 @@
             .then(r => r.text())
             .then(md => {
                 items = parsePlaylist(md);
-                console.log(items)
                 if (items.length === 0) {
                     document.getElementById('current').textContent = 'No items in playlist.';
                     return;
