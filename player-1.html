@@ -56,7 +56,8 @@
     <div id="player"></div>
     <script>
         // URL to the raw markdown file on GitHub
-        const playlistUrl = 'https://raw.githubusercontent.com/refractionx/screens-playlists/main/harlem-playlist-1.md';
+        const baseURL = window.location.href.replace(/player-1.html.*/, '');
+        const playlistUrl = `${baseURL}harlem-playlist-1.md`;
 
         let items = [];
         let currentIndex = 0;
@@ -128,7 +129,6 @@
         function playItem(idx) {
             currentIndex = idx;
             const item = items[idx];
-            item.duration = 5;;
             const playerDiv = document.getElementById('player');
             playerDiv.innerHTML = '';
             if (imageTimeout) { clearTimeout(imageTimeout); imageTimeout = null; }
@@ -226,6 +226,7 @@
             .then(r => r.text())
             .then(md => {
                 items = parsePlaylist(md);
+                console.log(items)
                 if (items.length === 0) {
                     document.getElementById('current').textContent = 'No items in playlist.';
                     return;
@@ -236,7 +237,7 @@
                 document.getElementById('current').textContent = 'Failed to load playlist.';
             });
         // Periodically check for HTML updates from GitHub and reload if changed
-        const htmlUrl = 'https://raw.githubusercontent.com/refractionx/screens-playlists/main/player-1.html';
+        const htmlUrl = `${baseURL}player-1.html`;
         let lastHtmlHash = null;
         async function hashString(str) {
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
