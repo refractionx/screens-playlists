@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screens Playlist Player</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #player,
+        img,
+        video,
+        iframe,
+        audio {
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            object-fit: contain;
+            background: #000;
+            display: block;
+            overflow: hidden;
+        }
+
+        /* Hide all UI elements */
+        .container,
+        #current,
+        #playlist,
+        button,
+        ul,
+        h1 {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="player"></div>
+    <script>
+        // URL to the raw markdown file on GitHub
+        const baseURL = window.location.href.replace(/player-1.html.*/, '');
+        const playlistUrl = `${baseURL}harlem-playlist-1.md`;
+
+        let items = [];
+        let currentIndex = 0;
+
+        function parsePlaylist(md) {
+            // Supports: [Title](url) or url, with optional { attr: value, ... }
+            return md.split('\n').map(line => {
+                line = line.trim();
+                if (!line) return null;
+                // Extract curly-brace attributes if present
+                let attr = {};
+                const attrMatch = line.match(/\{([^}]*)\}\s*$/);
+                if (attrMatch) {
+                    const attrStr = attrMatch[1];
+                    line = line.replace(/\{[^}]*\}\s*$/, '').trim();
+                    attrStr.split(',').forEach(pair => {
+                        const [k, v] = pair.split(':').map(s => s.trim());
+                        if (k && v !== undefined) {
+                            // Try to parse value as number or boolean, else string
+                            let val = v;
+                            if (/^\d+s$/.test(v)) val = parseInt(v, 10); // duration in seconds
+                            else if (/^\d+m$/.test(v)) val = parseInt(v, 10) * 60; // duration in minutes
+                            else if (v === 'true') val = true;
+                            else if (v === 'false') val = false;
+                            attr[k] = val;
+                        } else if (k) {
+                            // For flags like { muted }
+                            attr[k] = true;
+                        }
+                    });
+                }
+                // Markdown link: [Title](url)
+                const match = line.match(/\[(.*?)\]\((.*?)\)/);
+                if (match) {
+                    return { title: match[1], url: match[2], ...attr };
+                }
+                // Just a URL
+                if (/https?:\/\//.test(line)) {
+                    return { title: line, url: line, ...attr };
+                }
+                return null;
+            }).filter(Boolean);
+        }
+
+        function renderPlaylist() {
+            const ul = document.getElementById('playlist');
+            ul.innerHTML = '';
+            items.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.textContent = item.title || item.url;
+                if (idx === currentIndex) li.classList.add('active');
+                li.onclick = () => playItem(idx);
+                ul.appendChild(li);
+            });
+        }
+
+        let imageTimeout = null;
+        let ytPlayer = null;
+        function isYouTube(url) {
+            return /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/.test(url);
+        }
+        function getYouTubeId(url) {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+            return match ? match[1] : null;
+        }
+        function isImage(url) {
+            return /\.(png|jpe?g|gif|bmp|webp)$/i.test(url);
+        }
+        function playItem(idx) {
+            currentIndex = idx;
+            const item = items[idx];
+            const playerDiv = document.getElementById('player');
+            playerDiv.innerHTML = '';
+            if (imageTimeout) { clearTimeout(imageTimeout); imageTimeout = null; }
+            if (ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
+            let el;
+            if (isYouTube(item.url)) {
+                const ytId = getYouTubeId(item.url);
+                const ytDiv = document.createElement('div');
+                ytDiv.id = 'ytplayer';
+                ytDiv.style.width = '100vw';
+                ytDiv.style.height = '100vh';
+                playerDiv.appendChild(ytDiv);
+                function loadYT() {
+                    ytPlayer = new YT.Player('ytplayer', {
+                        videoId: ytId,
+                        playerVars: {
+                            autoplay: 1,
+                            mute: 1,
+                            controls: 1,
+                            showinfo: 0,
+                            rel: 0,
+                            modestbranding: 1,
+                            fs: 0
+                        },
+                        events: {
+                            'onReady': e => e.target.playVideo(),
+                            'onStateChange': e => {
+                                if (e.data === YT.PlayerState.ENDED) {
+                                    // Loop playlist
+                                    playItem((currentIndex + 1) % items.length);
+                                }
+                            }
+                        }
+                    });
+                }
+                if (!window.YT || !window.YT.Player) {
+                    // Load YouTube IFrame API if not loaded
+                    if (!document.getElementById('yt-iframe-api')) {
+                        const tag = document.createElement('script');
+                        tag.id = 'yt-iframe-api';
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        document.body.appendChild(tag);
+                    }
+                    window.onYouTubeIframeAPIReady = loadYT;
+                } else {
+                    loadYT();
+                }
+            } else if (isImage(item.url)) {
+                el = document.createElement('img');
+                el.src = item.url;
+                el.style.width = '100vw';
+                el.style.height = '100vh';
+                el.style.objectFit = 'contain';
+                playerDiv.appendChild(el);
+                const duration = item.duration || 5;
+                imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
+            } else if (/\.(mp4|webm|ogg|mov)$/i.test(item.url)) {
+                el = document.createElement('video');
+                el.src = item.url;
+                el.autoplay = true;
+                el.muted = true;
+                el.onended = () => playItem((currentIndex + 1) % items.length);
+                el.style.width = '100vw';
+                el.style.height = '100vh';
+                el.style.objectFit = 'contain';
+                playerDiv.appendChild(el);
+            } else if (/\.(mp3|wav|aac|m4a)$/i.test(item.url)) {
+                el = document.createElement('audio');
+                el.src = item.url;
+                el.autoplay = true;
+                el.onended = () => playItem((currentIndex + 1) % items.length);
+                el.style.width = '100vw';
+                el.style.height = '100vh';
+                playerDiv.appendChild(el);
+            } else if (/^https?:\/\//.test(item.url)) {
+                // Display website in iframe
+                el = document.createElement('iframe');
+                el.src = item.url;
+                el.allow = 'autoplay; fullscreen';
+                el.style.width = '100vw';
+                el.style.height = '100vh';
+                el.style.border = 'none';
+                playerDiv.appendChild(el);
+                // Use duration or default 30s for websites
+                const duration = item.duration || 30;
+                imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
+            } else {
+                playerDiv.innerHTML = '<em>Unsupported media type</em>';
+            }
+        }
+        // ...existing code...
+
+
+
+        fetch(playlistUrl)
+            .then(r => r.text())
+            .then(md => {
+                items = parsePlaylist(md);
+                if (items.length === 0) {
+                    document.getElementById('current').textContent = 'No items in playlist.';
+                    return;
+                }
+                playItem(0);
+            })
+            .catch(e => {
+                document.getElementById('current').textContent = 'Failed to load playlist.';
+            });
+        // Periodically check for playlist updates and restart play if changed
+        const htmlUrl = `${baseURL}player-1.html`;
+        let lastHtmlHash = null;
+        let lastPlaylistHash = null;
+
+        async function hashString(str) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function checkHtmlUpdate() {
+            try {
+                const r = await fetch(htmlUrl, { cache: 'no-store' });
+                const html = await r.text();
+                const hash = await hashString(html);
+                if (lastHtmlHash === null) {
+                    lastHtmlHash = hash;
+                } else if (hash !== lastHtmlHash) {
+                    location.reload();
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        async function checkPlaylistUpdate() {
+            try {
+                const r = await fetch(playlistUrl, { cache: 'no-store' });
+                const md = await r.text();
+                const hash = await hashString(md);
+                if (lastPlaylistHash === null) {
+                    lastPlaylistHash = hash;
+                } else if (hash !== lastPlaylistHash) {
+                    lastPlaylistHash = hash;
+                    items = parsePlaylist(md);
+                    if (items.length > 0) {
+                        playItem(0); // restart play from first item
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        checkHtmlUpdate();
+        setInterval(checkHtmlUpdate, 5 * 60000); // check every 5 minutes
+
+        checkPlaylistUpdate();
+        setInterval(checkPlaylistUpdate, 60000); // check playlist every 30 seconds
+    </script>
+</body>
+
+</html>
