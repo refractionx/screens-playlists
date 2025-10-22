@@ -57,7 +57,7 @@
     <div id="player"></div>
     <script>
         // URL to the raw markdown file on GitHub
-        const baseURL = window.location.href.replace(/player-1.html.*/, '');
+        const baseURL = window.location.href.replace(/player-2.html.*/, '');
         const playlistUrl = `${baseURL}harlem-playlist-1.md`;
 
         let items = [];
@@ -238,7 +238,7 @@
                 document.getElementById('current').textContent = 'Failed to load playlist.';
             });
         // Periodically check for playlist updates and restart play if changed
-        const htmlUrl = `${baseURL}player-1.html`;
+        const htmlUrl = `${baseURL}player-2.html`;
         let lastHtmlHash = null;
         let lastPlaylistHash = null;
 
