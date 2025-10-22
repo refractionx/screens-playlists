@@ -186,10 +186,11 @@
                 playerDiv.appendChild(el);
                 const duration = item.duration || 5;
                 imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
-            } else if (/\.(mp4|webm|ogg)$/i.test(item.url)) {
+            } else if (/\.(mp4|webm|ogg|mov)$/i.test(item.url)) {
                 el = document.createElement('video');
                 el.src = item.url;
                 el.autoplay = true;
+                //el.muted = true;
                 el.onended = () => playItem((currentIndex + 1) % items.length);
                 el.style.width = '100vw';
                 el.style.height = '100vh';
