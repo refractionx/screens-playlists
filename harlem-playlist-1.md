@@ -3,7 +3,6 @@ https://media.githubusercontent.com/media/refractionx/screens-playlists/main/ima
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/hrlm_bar_lounge_drinks_food_music-landscape.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/bear_eagle_hot_dog_the_real_taste_of_freedom-landscape.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/cheeseburger_california_dreamin-landscape.jpg
-https://raw.githubusercontent.com/refractionx/screens-playlists/main/Flamingo%2016-9%204K.png { duration: 30s }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/cheeseburger_california_dreamin_2-landscape.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/eagle_hot_dog-landscape.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/donangus.mov
