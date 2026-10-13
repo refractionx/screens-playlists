@@ -55,6 +55,7 @@
 
 <body>
     <div id="player"></div>
+    <div id="current" aria-live="polite"></div>
     <script>
         // URL to the raw markdown file on GitHub
         const baseURL = window.location.href.replace(/player-1.html.*/, '');
@@ -62,6 +63,53 @@
 
         let items = [];
         let currentIndex = 0;
+        let itemWatchdog = null;
+        let lastProgressAt = Date.now();
+        let playbackToken = 0;
+
+        function setStatus(message) {
+            const status = document.getElementById('current');
+            if (status) status.textContent = message;
+        }
+
+        function clearItemTimers() {
+            if (imageTimeout) { clearTimeout(imageTimeout); imageTimeout = null; }
+            if (itemWatchdog) { clearTimeout(itemWatchdog); itemWatchdog = null; }
+        }
+
+        function stopPlayback(message) {
+            playbackToken += 1;
+            items = [];
+            currentIndex = 0;
+            clearItemTimers();
+            if (ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
+            const playerDiv = document.getElementById('player');
+            if (playerDiv) playerDiv.innerHTML = '';
+            lastProgressAt = Date.now();
+            setStatus(message || 'Playlist is empty.');
+        }
+
+        function hasMalformedNonEntryContent(md) {
+            return md.split('\n').some(raw => {
+                const line = raw.trim();
+                return line && !line.startsWith('#') && !line.startsWith('<!--');
+            });
+        }
+
+        function advance(reason, expectedToken) {
+            if (!items.length) return;
+            if (expectedToken !== undefined && expectedToken !== playbackToken) return;
+            setStatus(reason || 'Advancing playlist');
+            playItem((currentIndex + 1) % items.length);
+        }
+
+        function armWatchdog(seconds, expectedToken) {
+            const token = expectedToken === undefined ? playbackToken : expectedToken;
+            if (token !== playbackToken) return;
+            if (itemWatchdog) clearTimeout(itemWatchdog);
+            const safeSeconds = Math.max(10, Math.min(Number(seconds) || 300, 6 * 60 * 60));
+            itemWatchdog = setTimeout(() => advance('Media watchdog timeout', token), safeSeconds * 1000);
+        }
 
         function parsePlaylist(md) {
             // Supports: [Title](url) or url, with optional { attr: value, ... }
@@ -128,11 +176,14 @@
             return /\.(png|jpe?g|gif|bmp|webp)$/i.test(url);
         }
         function playItem(idx) {
+            if (!items.length || !Number.isInteger(idx) || idx < 0 || idx >= items.length) return;
+            const token = ++playbackToken;
             currentIndex = idx;
             const item = items[idx];
             const playerDiv = document.getElementById('player');
             playerDiv.innerHTML = '';
-            if (imageTimeout) { clearTimeout(imageTimeout); imageTimeout = null; }
+            clearItemTimers();
+            lastProgressAt = Date.now();
             if (ytPlayer && ytPlayer.destroy) { ytPlayer.destroy(); ytPlayer = null; }
             let el;
             if (isYouTube(item.url)) {
@@ -142,7 +193,9 @@
                 ytDiv.style.width = '100vw';
                 ytDiv.style.height = '100vh';
                 playerDiv.appendChild(ytDiv);
+                armWatchdog(60, token);
                 function loadYT() {
+                    if (token !== playbackToken) return;
                     ytPlayer = new YT.Player('ytplayer', {
                         videoId: ytId,
                         playerVars: {
@@ -155,13 +208,28 @@
                             fs: 0
                         },
                         events: {
-                            'onReady': e => e.target.playVideo(),
+                            'onReady': e => {
+                                if (token !== playbackToken) return;
+                                lastProgressAt = Date.now();
+                                e.target.playVideo();
+                                armWatchdog(item.duration || 1800, token);
+                            },
                             'onStateChange': e => {
+                                if (token !== playbackToken) return;
+                                lastProgressAt = Date.now();
                                 if (e.data === YT.PlayerState.ENDED) {
                                     // Loop playlist
-                                    playItem((currentIndex + 1) % items.length);
+                                    advance('YouTube item ended', token);
+                                } else if (e.data === YT.PlayerState.PLAYING) {
+                                    // Backstop only — ENDED (above) handles the normal advance.
+                                    // YouTube fires onStateChange on transitions, not continuously,
+                                    // so arm for the FULL video length (+buffer), never a fixed 120s
+                                    // which would force-advance any video longer than two minutes.
+                                    const ytDuration = (typeof e.target.getDuration === 'function' ? e.target.getDuration() : 0) || 0;
+                                    armWatchdog(item.duration || (ytDuration ? ytDuration + 30 : 1800), token);
                                 }
-                            }
+                            },
+                            'onError': () => setTimeout(() => advance('YouTube playback failed', token), 2000)
                         }
                     });
                 }
@@ -171,6 +239,7 @@
                         const tag = document.createElement('script');
                         tag.id = 'yt-iframe-api';
                         tag.src = "https://www.youtube.com/iframe_api";
+                        tag.onerror = () => setTimeout(() => advance('YouTube API failed to load', token), 2000);
                         document.body.appendChild(tag);
                     }
                     window.onYouTubeIframeAPIReady = loadYT;
@@ -180,76 +249,104 @@
             } else if (isImage(item.url)) {
                 el = document.createElement('img');
                 el.src = item.url;
+                el.onload = () => { if (token === playbackToken) lastProgressAt = Date.now(); };
+                el.onerror = () => setTimeout(() => advance('Image failed to load', token), 2000);
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 el.style.objectFit = 'contain';
                 playerDiv.appendChild(el);
                 const duration = item.duration || 5;
-                imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
+                imageTimeout = setTimeout(() => advance('Image duration elapsed', token), duration * 1000);
             } else if (/\.(mp4|webm|ogg|mov)$/i.test(item.url)) {
                 el = document.createElement('video');
                 el.src = item.url;
                 el.autoplay = true;
-                //el.muted = true;
-                el.onended = () => playItem((currentIndex + 1) % items.length);
+                el.muted = true; // browsers block UNMUTED programmatic autoplay -> the video would be skipped (matches player-2.html)
+                el.onended = () => advance('Video ended', token);
+                el.onerror = () => setTimeout(() => advance('Video failed to load', token), 2000);
+                el.onstalled = () => armWatchdog(30, token);
+                el.ontimeupdate = () => { if (token === playbackToken) lastProgressAt = Date.now(); armWatchdog(120, token); };
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 el.style.objectFit = 'contain';
                 playerDiv.appendChild(el);
+                armWatchdog(item.duration || 1800, token);
+                const playAttempt = el.play();
+                if (playAttempt && playAttempt.catch) playAttempt.catch(() => setTimeout(() => advance('Video autoplay failed', token), 2000));
             } else if (/\.(mp3|wav|aac|m4a)$/i.test(item.url)) {
                 el = document.createElement('audio');
                 el.src = item.url;
                 el.autoplay = true;
-                el.onended = () => playItem((currentIndex + 1) % items.length);
+                el.onended = () => advance('Audio ended', token);
+                el.onerror = () => setTimeout(() => advance('Audio failed to load', token), 2000);
+                el.onstalled = () => armWatchdog(30, token);
+                el.ontimeupdate = () => { if (token === playbackToken) lastProgressAt = Date.now(); armWatchdog(120, token); };
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 playerDiv.appendChild(el);
+                armWatchdog(item.duration || 1800, token);
+                const playAttempt = el.play();
+                if (playAttempt && playAttempt.catch) playAttempt.catch(() => setTimeout(() => advance('Audio autoplay failed', token), 2000));
             } else if (/^https?:\/\//.test(item.url)) {
                 // Display website in iframe
                 el = document.createElement('iframe');
                 el.src = item.url;
                 el.allow = 'autoplay; fullscreen';
+                el.sandbox = 'allow-scripts allow-autoplay';
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 el.style.border = 'none';
                 playerDiv.appendChild(el);
                 // Use duration or default 30s for websites
                 const duration = item.duration || 30;
-                imageTimeout = setTimeout(() => playItem((currentIndex + 1) % items.length), duration * 1000);
+                imageTimeout = setTimeout(() => advance('Website duration elapsed', token), duration * 1000);
             } else {
-                playerDiv.innerHTML = '<em>Unsupported media type</em>';
+                setStatus('Unsupported media type');
+                imageTimeout = setTimeout(() => advance('Unsupported media type', token), 2000);
             }
         }
         // ...existing code...
 
 
 
-        fetch(playlistUrl)
-            .then(r => r.text())
+        function loadInitialPlaylist() {
+          fetch(playlistUrl, { cache: 'no-store' })
+            .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
             .then(md => {
-                items = parsePlaylist(md);
-                if (items.length === 0) {
-                    document.getElementById('current').textContent = 'No items in playlist.';
+                const parsedItems = parsePlaylist(md);
+                if (parsedItems.length === 0) {
+                    stopPlayback('No items in playlist.');
+                    setTimeout(loadInitialPlaylist, 30000);
                     return;
                 }
+                items = parsedItems;
                 playItem(0);
             })
-            .catch(e => {
-                document.getElementById('current').textContent = 'Failed to load playlist.';
+            .catch(() => {
+                setStatus('Failed to load playlist; retrying.');
+                setTimeout(loadInitialPlaylist, 30000);
             });
+        }
+        loadInitialPlaylist();
         // Periodically check for playlist updates and restart play if changed
         const htmlUrl = `${baseURL}player-1.html`;
         let lastHtmlHash = null;
         let lastPlaylistHash = null;
 
         async function hashString(str) {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            if (window.crypto && crypto.subtle && window.TextEncoder) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            let hash = 2166136261;
+            for (let i = 0; i < str.length; i++) hash = Math.imul(hash ^ str.charCodeAt(i), 16777619);
+            return String(hash >>> 0);
         }
 
         async function checkHtmlUpdate() {
             try {
                 const r = await fetch(htmlUrl, { cache: 'no-store' });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 const html = await r.text();
                 const hash = await hashString(html);
                 if (lastHtmlHash === null) {
@@ -263,16 +360,24 @@
         async function checkPlaylistUpdate() {
             try {
                 const r = await fetch(playlistUrl, { cache: 'no-store' });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 const md = await r.text();
                 const hash = await hashString(md);
                 if (lastPlaylistHash === null) {
                     lastPlaylistHash = hash;
                 } else if (hash !== lastPlaylistHash) {
                     lastPlaylistHash = hash;
-                    items = parsePlaylist(md);
-                    if (items.length > 0) {
-                        playItem(0); // restart play from first item
+                    const parsedItems = parsePlaylist(md);
+                    if (parsedItems.length === 0 && hasMalformedNonEntryContent(md)) {
+                        setStatus('Ignored malformed playlist update; continuing last valid playlist.');
+                        return;
                     }
+                    if (parsedItems.length === 0) {
+                        stopPlayback('Playlist was cleared.');
+                        return;
+                    }
+                    items = parsedItems;
+                    playItem(0); // restart play from first item
                 }
             } catch (e) { /* ignore */ }
         }
@@ -281,7 +386,12 @@
         setInterval(checkHtmlUpdate, 5 * 60000); // check every 5 minutes
 
         checkPlaylistUpdate();
-        setInterval(checkPlaylistUpdate, 60000); // check playlist every 30 seconds
+        setInterval(checkPlaylistUpdate, 60000); // check playlist every 60 seconds
+        setInterval(() => {
+            if (items.length && Date.now() - lastProgressAt > 2 * 60 * 60 * 1000) {
+                advance('Global playback watchdog');
+            }
+        }, 60000);
     </script>
 </body>
 
