@@ -50,6 +50,19 @@
         h1 {
             display: none !important;
         }
+
+        /* Diagnostic overlay, shown only for playback-blocking errors */
+        #current.show {
+            display: block !important;
+            position: fixed;
+            left: 8px;
+            bottom: 8px;
+            padding: 4px 8px;
+            font: 12px/1.4 monospace;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10;
+        }
     </style>
 </head>
 
@@ -67,9 +80,12 @@
         let lastProgressAt = Date.now();
         let playbackToken = 0;
 
-        function setStatus(message) {
+        function setStatus(message, show) {
             const status = document.getElementById('current');
-            if (status) status.textContent = message;
+            if (status) {
+                status.textContent = message || '';
+                status.classList.toggle('show', !!show && !!message);
+            }
         }
 
         function clearItemTimers() {
@@ -109,6 +125,53 @@
             if (itemWatchdog) clearTimeout(itemWatchdog);
             const safeSeconds = Math.max(10, Math.min(Number(seconds) || 300, 6 * 60 * 60));
             itemWatchdog = setTimeout(() => advance('Media watchdog timeout', token), safeSeconds * 1000);
+        }
+
+        // Kiosk browsers / WebViews can reject programmatic play() (NotAllowedError) even
+        // for muted videos. A tap/click on the screen satisfies the gesture requirement.
+        let gestureUnlockArmed = false;
+        function armGestureUnlock() {
+            if (gestureUnlockArmed) return;
+            gestureUnlockArmed = true;
+            const unlock = () => {
+                const media = document.querySelector('#player video, #player audio');
+                if (media && media.paused) {
+                    const attempt = media.play();
+                    if (attempt && attempt.catch) attempt.catch(() => {});
+                }
+            };
+            ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(evt =>
+                document.addEventListener(evt, unlock));
+        }
+
+        // Hold the first frame on screen and retry play() for ~60s instead of instantly
+        // skipping the item; only give up (and advance) when the policy never lifts.
+        function handleAutoplayBlocked(el, token, err, kind) {
+            if (token !== playbackToken) return;
+            if (err && err.name === 'NotAllowedError') {
+                setStatus(`${kind} autoplay blocked by browser policy; retrying — tap the screen to allow playback`, true);
+                armGestureUnlock();
+                let attempts = 0;
+                const retry = () => {
+                    if (token !== playbackToken) return;
+                    attempts += 1;
+                    const attempt = el.play();
+                    if (attempt && attempt.catch) {
+                        attempt.catch(e2 => {
+                            if (token !== playbackToken) return;
+                            if (e2 && e2.name === 'NotAllowedError') {
+                                if (attempts < 12) setTimeout(retry, 5000);
+                                else advance(`${kind} autoplay blocked by browser policy`, token);
+                            } else {
+                                setTimeout(() => advance(`${kind} autoplay failed`, token), 2000);
+                            }
+                        });
+                    }
+                };
+                setTimeout(retry, 5000);
+            } else {
+                setTimeout(() => advance(`${kind} autoplay failed`, token), 2000);
+            }
         }
 
         function parsePlaylist(md) {
@@ -259,20 +322,29 @@
                 imageTimeout = setTimeout(() => advance('Image duration elapsed', token), duration * 1000);
             } else if (/\.(mp4|webm|ogg|mov)$/i.test(item.url)) {
                 el = document.createElement('video');
-                el.src = item.url;
                 el.autoplay = true;
+                // Set muted as content attribute AND property before assigning src: some
+                // WebView/WebKit builds only honor the muted *attribute* for the autoplay
+                // exemption; without it play() is rejected and the item gets skipped.
+                el.setAttribute('muted', '');
+                el.defaultMuted = true;
                 el.muted = true; // browsers block UNMUTED programmatic autoplay -> the video would be skipped (matches player-2.html)
+                el.setAttribute('playsinline', ''); // iOS/Safari: play inline instead of fullscreen handoff
+                el.playsInline = true;
+                el.preload = 'auto';
+                el.src = item.url;
                 el.onended = () => advance('Video ended', token);
                 el.onerror = () => setTimeout(() => advance('Video failed to load', token), 2000);
                 el.onstalled = () => armWatchdog(30, token);
                 el.ontimeupdate = () => { if (token === playbackToken) lastProgressAt = Date.now(); armWatchdog(120, token); };
+                el.onplaying = () => { if (token === playbackToken) { lastProgressAt = Date.now(); setStatus(''); } };
                 el.style.width = '100vw';
                 el.style.height = '100vh';
                 el.style.objectFit = 'contain';
                 playerDiv.appendChild(el);
                 armWatchdog(item.duration || 1800, token);
                 const playAttempt = el.play();
-                if (playAttempt && playAttempt.catch) playAttempt.catch(() => setTimeout(() => advance('Video autoplay failed', token), 2000));
+                if (playAttempt && playAttempt.catch) playAttempt.catch(err => handleAutoplayBlocked(el, token, err, 'Video'));
             } else if (/\.(mp3|wav|aac|m4a)$/i.test(item.url)) {
                 el = document.createElement('audio');
                 el.src = item.url;
@@ -286,7 +358,7 @@
                 playerDiv.appendChild(el);
                 armWatchdog(item.duration || 1800, token);
                 const playAttempt = el.play();
-                if (playAttempt && playAttempt.catch) playAttempt.catch(() => setTimeout(() => advance('Audio autoplay failed', token), 2000));
+                if (playAttempt && playAttempt.catch) playAttempt.catch(err => handleAutoplayBlocked(el, token, err, 'Audio'));
             } else if (/^https?:\/\//.test(item.url)) {
                 // Display website in iframe
                 el = document.createElement('iframe');
