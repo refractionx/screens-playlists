@@ -63,12 +63,27 @@
             background: rgba(0, 0, 0, 0.6);
             z-index: 10;
         }
+        #tv-video {
+            position: fixed; left: 0; top: 0; display: none; z-index: 1;
+        }
+        #start-playback.show {
+            display: block !important; position: fixed; z-index: 20;
+            left: 50%; top: 70%; transform: translate(-50%, -50%);
+            max-width: 90vw; padding: 22px 32px; border: 3px solid #fff;
+            border-radius: 8px; background: #171b20; color: #fff;
+            font: bold 28px/1.4 sans-serif; text-align: center;
+            cursor: pointer;
+        }
+        #start-playback:focus { outline: 4px solid #f5e52f; outline-offset: 5px; }
     </style>
 </head>
 
 <body>
     <div id="player"></div>
+    <video id="tv-video" autoplay muted playsinline webkit-playsinline preload="auto" tabindex="-1"></video>
+    <button id="start-playback" type="button">Натиснете OK или ▶ на дистанционното<br>за старт на видеата</button>
     <div id="current" aria-live="polite"></div>
+    <script src="tv-media.js?v=20261108-1"></script>
     <script>
         // URL to the raw markdown file on GitHub
         const baseURL = window.location.href.replace(/player-1.html.*/, '');
@@ -79,6 +94,22 @@
         let itemWatchdog = null;
         let lastProgressAt = Date.now();
         let playbackToken = 0;
+        const videoPlayer = new TVMediaPlayer(
+            document.getElementById('tv-video'), document.getElementById('start-playback'), {
+                isCurrent: token => token === playbackToken,
+                onPlaying: token => { lastProgressAt = Date.now(); setStatus(''); armWatchdog(120, token); },
+                onProgress: token => { lastProgressAt = Date.now(); armWatchdog(120, token); },
+                onEnded: token => advance('Video ended', token),
+                onBlocked: () => {
+                    if (itemWatchdog) clearTimeout(itemWatchdog);
+                    itemWatchdog = null;
+                    setStatus('');
+                },
+                onError: (token, message) => {
+                    setStatus(message, true);
+                    setTimeout(() => advance(message, token), 2000);
+                }
+            });
 
         function setStatus(message, show) {
             const status = document.getElementById('current');
@@ -89,6 +120,7 @@
         }
 
         function clearItemTimers() {
+            videoPlayer.stop();
             if (imageTimeout) { clearTimeout(imageTimeout); imageTimeout = null; }
             if (itemWatchdog) { clearTimeout(itemWatchdog); itemWatchdog = null; }
         }
@@ -321,30 +353,7 @@
                 const duration = item.duration || 5;
                 imageTimeout = setTimeout(() => advance('Image duration elapsed', token), duration * 1000);
             } else if (/\.(mp4|webm|ogg|mov)$/i.test(item.url)) {
-                el = document.createElement('video');
-                el.autoplay = true;
-                // Set muted as content attribute AND property before assigning src: some
-                // WebView/WebKit builds only honor the muted *attribute* for the autoplay
-                // exemption; without it play() is rejected and the item gets skipped.
-                el.setAttribute('muted', '');
-                el.defaultMuted = true;
-                el.muted = true; // browsers block UNMUTED programmatic autoplay -> the video would be skipped (matches player-2.html)
-                el.setAttribute('playsinline', ''); // iOS/Safari: play inline instead of fullscreen handoff
-                el.playsInline = true;
-                el.preload = 'auto';
-                el.src = item.url;
-                el.onended = () => advance('Video ended', token);
-                el.onerror = () => setTimeout(() => advance('Video failed to load', token), 2000);
-                el.onstalled = () => armWatchdog(30, token);
-                el.ontimeupdate = () => { if (token === playbackToken) lastProgressAt = Date.now(); armWatchdog(120, token); };
-                el.onplaying = () => { if (token === playbackToken) { lastProgressAt = Date.now(); setStatus(''); } };
-                el.style.width = '100vw';
-                el.style.height = '100vh';
-                el.style.objectFit = 'contain';
-                playerDiv.appendChild(el);
-                armWatchdog(item.duration || 1800, token);
-                const playAttempt = el.play();
-                if (playAttempt && playAttempt.catch) playAttempt.catch(err => handleAutoplayBlocked(el, token, err, 'Video'));
+                videoPlayer.open(item.url, token);
             } else if (/\.(mp3|wav|aac|m4a)$/i.test(item.url)) {
                 el = document.createElement('audio');
                 el.src = item.url;
