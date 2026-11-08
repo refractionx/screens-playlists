@@ -1,3 +1,4 @@
+https://media.githubusercontent.com/media/refractionx/screens-playlists/main/10-fc27-tournament-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/Gemini_Generated_Image_jhozrtjhozrtjhoz_landscape.png
 https://media.githubusercontent.com/media/refractionx/screens-playlists/091e6cfb1218d9280bee7722f18429fd95e0dfa7/04-fc27-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/hrlm_bar_lounge_drinks_food_music-landscape.jpg
