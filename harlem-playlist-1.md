@@ -1,7 +1,6 @@
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/11-mortal-kombat-legacy-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/01-your-moment-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/10-fc27-tournament-landscape-silent.mp4
-https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/Gemini_Generated_Image_jhozrtjhozrtjhoz_landscape.png
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/gta/12-gta-vi-vice-city-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/02-in-the-details-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/091e6cfb1218d9280bee7722f18429fd95e0dfa7/04-fc27-landscape-silent.mp4
@@ -12,12 +11,10 @@ https://media.githubusercontent.com/media/refractionx/screens-playlists/main/ima
 https://media.githubusercontent.com/media/refractionx/screens-playlists/091e6cfb1218d9280bee7722f18429fd95e0dfa7/05-gta-vi-release-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/04-letterform-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/09-ocean-spritz-landscape-silent.mp4
-https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/Gemini_Generated_Image_jhozrtjhozrtjhoz_landscape.png
-https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/05-lookbook-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/gta/13-gta-vi-jason-lucia-landscape-silent.mp4
+https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/05-lookbook-landscape-silent.mp4
 https://refractionx.com/screen.html { duration: 30s }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/Gemini_Generated_Image_jhozrtjhozrtjhoz_landscape.png
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/siel/06-red-reflections-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/hrlm_drinks_music_vibes-landscape.jpg
-https://media.githubusercontent.com/media/refractionx/screens-playlists/main/images/Gemini_Generated_Image_jhozrtjhozrtjhoz_landscape.png
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/gta/14-gta-vi-leonida-action-landscape-silent.mp4
