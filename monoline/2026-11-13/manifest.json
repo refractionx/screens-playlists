@@ -1,0 +1,228 @@
+{
+  "revision": "2026-11-13",
+  "font": {
+    "family": "Dunav Monoline",
+    "version": "1.000",
+    "sha256": "12121c82339e313da00b94f631959e93193721b26e653fe7efdcbd544c445577",
+    "original": "/Volumes/SanDisk/dev/venue/font/dist/DunavMonoline-Regular.ttf",
+    "project_copy": "hrlm-ads/project/assets/fonts/DunavMonoline-Regular.ttf",
+    "license": "SIL Open Font License 1.1",
+    "revision": "2026-11-13"
+  },
+  "playlist_items": 25,
+  "video_slots": 19,
+  "image_slots": 5,
+  "unique_posters": 4,
+  "order_preserved": true,
+  "reklamirai_slots": 2,
+  "video_audio": "none",
+  "files": [
+    {
+      "target": "monoline/2026-11-13/11-mortal-kombat-legacy-landscape-silent.mp4",
+      "bytes": 8460392,
+      "sha256": "53481c3644e0f8e01e1b18cab9538b3c18c3935cc36f2cadec27c730d83193f0",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/01-your-moment-landscape-silent.mp4",
+      "bytes": 5291079,
+      "sha256": "84a3878b200d25ca24f47a92809c3fca704db9b97e1fd9db7108b84722d83ecc",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/shooters/19-half-life-stalkyard-landscape-silent.mp4",
+      "bytes": 11073716,
+      "sha256": "50bfaa4568f399c41882edbb1bd2741bdaf76440645c61093248e14bd75e9984",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/10-fc27-tournament-landscape-silent.mp4",
+      "bytes": 19162629,
+      "sha256": "658fb255f4c2c233d643310c18e20ccbe2c0aa61c370a0a6fb6d122de8f9ba52",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/gta/12-gta-vi-vice-city-landscape-silent.mp4",
+      "bytes": 12742039,
+      "sha256": "4b7248ba6b377655ba73fb5ff7b2b46d6503280d438320ac312c52ebe8982e61",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/02-in-the-details-landscape-silent.mp4",
+      "bytes": 8459298,
+      "sha256": "18366d75d0be79f24d5093010091fd34e503d4d67f55502c75508f80801db1d5",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/04-fc27-landscape-silent.mp4",
+      "bytes": 12839391,
+      "sha256": "2099aff89bc667dc66821a455671ae154bb42867321c048f71c4cd9e2f28f214",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/shooters/16-cs16-5v5-landscape-silent.mp4",
+      "bytes": 10815096,
+      "sha256": "e745d6f1604ebeae83eca9b10a431ce801c46f333d013e77a5fe704ce97582f1",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/images/bar-lounge.jpg",
+      "bytes": 453676,
+      "sha256": "1274c171a8dcb1cf6601c859589c55b954785668de77d33f38cb757beea613e5",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/images/advertise.jpg",
+      "bytes": 457241,
+      "sha256": "3284e4e900986f4af608c960e5f43e15f4a299e691c32aef9533c0758bca854c",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/03-in-colour-landscape-silent.mp4",
+      "bytes": 7618480,
+      "sha256": "2e7fdebfca6885193507efd8a418ec5bafd8c060bbac037af7ed4b13d8005d37",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/images/city-groove.jpg",
+      "bytes": 591755,
+      "sha256": "72ee3f2074df9df4bcdaf79f9a9ea12359bbce667bc38b6f3295db02c943751f",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/05-gta-vi-release-landscape-silent.mp4",
+      "bytes": 11653961,
+      "sha256": "ee4f1cd9ce446be849c44e943e4b75afaa9b73dbe990067e27bc9ce157a3c166",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/04-letterform-landscape-silent.mp4",
+      "bytes": 5994364,
+      "sha256": "a9356acfea807b1ee8c129151774e3f4c4483d5cb670eba02ef7fe05a9886bd5",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/shooters/18-half-life-crossfire-landscape-silent.mp4",
+      "bytes": 10300136,
+      "sha256": "6e78eec2b012e0af0f51bb9c0cf3090d04e0448087b52d554c761e00cc9b21dd",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/09-ocean-spritz-landscape-silent.mp4",
+      "bytes": 3540880,
+      "sha256": "59cd296d6315a6a15ee152521b656aa06df308dbec5f50c5bce529d61d1ccb13",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/shooters/15-cs2-5v5-landscape-silent.mp4",
+      "bytes": 11686726,
+      "sha256": "17fc76da20119e2c45451c0e4b7b7e96804612ef7141784c0fc8b87280b8d293",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/gta/13-gta-vi-jason-lucia-landscape-silent.mp4",
+      "bytes": 9845548,
+      "sha256": "6f46b5d87234e738f72557a8efd0984ff9bed4835718beafff8b48aac2ad2db7",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/05-lookbook-landscape-silent.mp4",
+      "bytes": 10992897,
+      "sha256": "38f464dce760a395ded7728ccb77cd6ce92f0bf629c78da58944356be86c0f5e",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/siel/06-red-reflections-landscape-silent.mp4",
+      "bytes": 8886678,
+      "sha256": "d707cd917191fd9384e555cfcb5be914176f3729c808f90cf85f5235b03164fd",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/shooters/17-cs16-retro-landscape-silent.mp4",
+      "bytes": 12826273,
+      "sha256": "bc7fd22cff185afb6d4f26ad3a46a0e7d6fedfd83d69d3697e65ae66b05b42dc",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/images/drinks-vibes.jpg",
+      "bytes": 460386,
+      "sha256": "36375a9d77429d58adc259f6268c4e3ffd3e2222899cf8a6a60f880f394758c5",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "target": "monoline/2026-11-13/gta/14-gta-vi-leonida-action-landscape-silent.mp4",
+      "bytes": 11207761,
+      "sha256": "04a5e25a082c7ef773964b0b748ee01d3b10dcf5717f1dd54219c2d724d8c608",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    }
+  ]
+}
