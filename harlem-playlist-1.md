@@ -2,24 +2,30 @@ https://media.githubusercontent.com/media/refractionx/screens-playlists/main/mon
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/01-your-moment-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/19-half-life-stalkyard-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/10-fc27-tournament-landscape-silent.mp4
+https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
+https://hrlm.bg/tournament/display { duration: 30s, from: 1794780000000 }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/gta/12-gta-vi-vice-city-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/02-in-the-details-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/04-fc27-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/16-cs16-5v5-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/images/bar-lounge.jpg
+https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/images/advertise.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/03-in-colour-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/images/city-groove.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/05-gta-vi-release-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/04-letterform-landscape-silent.mp4
+https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/18-half-life-crossfire-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/09-ocean-spritz-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/15-cs2-5v5-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/gta/13-gta-vi-jason-lucia-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/05-lookbook-landscape-silent.mp4
+https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
 https://refractionx.com/screen.html { duration: 30s }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/images/advertise.jpg
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/06-red-reflections-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/17-cs16-retro-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/images/drinks-vibes.jpg
+https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/gta/14-gta-vi-leonida-action-landscape-silent.mp4

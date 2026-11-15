@@ -246,6 +246,13 @@
             }).filter(Boolean);
         }
 
+        // Optional schedule boundaries are epoch milliseconds, inclusive from / exclusive until.
+        function isScheduledNow(item, now = Date.now()) {
+            const from = item.from === undefined ? -Infinity : Number(item.from);
+            const until = item.until === undefined ? Infinity : Number(item.until);
+            return !Number.isNaN(from) && !Number.isNaN(until) && from <= now && now < until;
+        }
+
         function renderPlaylist() {
             const ul = document.getElementById('playlist');
             ul.innerHTML = '';
@@ -272,6 +279,17 @@
         }
         function playItem(idx) {
             if (!items.length || !Number.isInteger(idx) || idx < 0 || idx >= items.length) return;
+            // Check again on every transition, including when an overnight playlist refresh fails.
+            let skipped = 0;
+            while (skipped < items.length && !isScheduledNow(items[idx])) {
+                idx = (idx + 1) % items.length;
+                skipped += 1;
+            }
+            if (skipped === items.length) {
+                stopPlayback('No scheduled items are active.');
+                setTimeout(loadInitialPlaylist, 30000);
+                return;
+            }
             const token = ++playbackToken;
             currentIndex = idx;
             const item = items[idx];
@@ -380,7 +398,9 @@
                 playerDiv.appendChild(el);
                 // Use duration or default 30s for websites
                 const duration = item.duration || 30;
-                imageTimeout = setTimeout(() => advance('Website duration elapsed', token), duration * 1000);
+                const until = item.until === undefined ? Infinity : Number(item.until);
+                const remaining = Math.max(0, Math.min(duration * 1000, until - Date.now()));
+                imageTimeout = setTimeout(() => advance('Website duration elapsed', token), remaining);
             } else {
                 setStatus('Unsupported media type');
                 imageTimeout = setTimeout(() => advance('Unsupported media type', token), 2000);
@@ -394,7 +414,7 @@
           fetch(playlistUrl, { cache: 'no-store' })
             .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
             .then(md => {
-                const parsedItems = parsePlaylist(md);
+                const parsedItems = parsePlaylist(md).filter(item => isScheduledNow(item));
                 if (parsedItems.length === 0) {
                     stopPlayback('No items in playlist.');
                     setTimeout(loadInitialPlaylist, 30000);
@@ -443,13 +463,13 @@
                 const r = await fetch(playlistUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 const md = await r.text();
-                const hash = await hashString(md);
-                if (lastPlaylistHash === null) {
+                const allItems = parsePlaylist(md);
+                const parsedItems = allItems.filter(item => isScheduledNow(item));
+                // Hash active entries so time boundaries take effect even when the file is unchanged.
+                const hash = await hashString(JSON.stringify(parsedItems));
+                if (hash !== lastPlaylistHash) {
                     lastPlaylistHash = hash;
-                } else if (hash !== lastPlaylistHash) {
-                    lastPlaylistHash = hash;
-                    const parsedItems = parsePlaylist(md);
-                    if (parsedItems.length === 0 && hasMalformedNonEntryContent(md)) {
+                    if (parsedItems.length === 0 && allItems.length === 0 && hasMalformedNonEntryContent(md)) {
                         setStatus('Ignored malformed playlist update; continuing last valid playlist.');
                         return;
                     }
@@ -457,6 +477,7 @@
                         stopPlayback('Playlist was cleared.');
                         return;
                     }
+                    if (JSON.stringify(items) === JSON.stringify(parsedItems)) return;
                     items = parsedItems;
                     playItem(0); // restart play from first item
                 }
