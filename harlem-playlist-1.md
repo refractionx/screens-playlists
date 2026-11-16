@@ -1,7 +1,6 @@
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/11-mortal-kombat-legacy-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/siel/01-your-moment-landscape-silent.mp4
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/shooters/19-half-life-stalkyard-landscape-silent.mp4
-https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/10-fc27-tournament-landscape-silent.mp4
 https://hrlm.bg/tournament/display { duration: 60s, until: 1794780000000 }
 https://hrlm.bg/tournament/display { duration: 30s, from: 1794780000000 }
 https://media.githubusercontent.com/media/refractionx/screens-playlists/main/monoline/2026-11-13/gta/12-gta-vi-vice-city-landscape-silent.mp4
